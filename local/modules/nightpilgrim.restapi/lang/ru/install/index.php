@@ -1,0 +1,5 @@
+<?php
+$MESS['CITFACTEVENTLOG_MODULE_NAME'] = 'REST API модуль';
+$MESS['CITFACTEVENTLOG_MODULE_DESCRIPTION'] = 'Модуль для обработки REST API запросов';
+$MESS['PARTNER_NAME'] = 'NightPilgrim';
+$MESS['PARTNER_URI'] = '';
