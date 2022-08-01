@@ -45,7 +45,8 @@ class JwtRepository
     public function createToken($userId, $password = '', $signature = '')
     {
         $userId = (int)$userId;
-        if ($arUserInJwt = $this->issetUserJwt($userId) && $signature === '') {
+        $arUserInJwt = $this->issetUserJwt($userId);
+        if ($arUserInJwt['id'] && $signature === '') {
             $signature = $arUserInJwt['secret_key'];
         } elseif ($password !== '') {
             $secret = md5(self::SECRET_KEY . $password);
@@ -55,6 +56,8 @@ class JwtRepository
                'user_id'    => $userId
             ]);
         }
+
+
         if ($signature) {
             return $this->getHeader() . '.' . $this->getPayload($userId) . '.' . $signature;
         } else {
