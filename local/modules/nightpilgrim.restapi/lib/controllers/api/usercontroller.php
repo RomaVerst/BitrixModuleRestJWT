@@ -4,6 +4,7 @@ namespace NightPilgrim\RestApi\Controllers\Api;
 
 use NightPilgrim\RestApi\Traits\ValidatorTrait;
 use NightPilgrim\RestApi\Traits\SafeTrait;
+use NightPilgrim\RestApi\Traits\PaginatorTrait;
 use \Bitrix\Main\Error;
 use Bitrix\Main\Localization\Loc;
 use NightPilgrim\RestApi\Entity\Jwt\JwtRepository;
@@ -14,8 +15,9 @@ class UserController extends \Bitrix\Main\Engine\Controller
 {
     use ValidatorTrait;
     use SafeTrait;
+    use PaginatorTrait;
 
-    private $issetJwt = false;
+    const PAGE_SIZE = 10;
 
     public function registerAction()
     {
@@ -186,10 +188,25 @@ class UserController extends \Bitrix\Main\Engine\Controller
 
                 $cache->EndDataCache($arResult);
             }
+            $page = $this->safeParams($this->request->getPost('page'));
+            $arResult = $this->getPagin($arResult, self::PAGE_SIZE, ($page) ?? 1);
+            if(!$arResult) {
+                throw new \Exception(Loc::getMessage('NO_ITEMS'));
+            }
             return ['user_list' => $arResult];
         } catch (\Exception $e) {
-            header('400 Bad Request', true, 400);
-            $this->addError(new Error($e->getMessage(), 400));
+            switch ($e->getMessage()) {
+                case Loc::getMessage('NO_ITEMS'):
+                    $code = 404;
+                    header('404 Not Found', true, 404);
+                    break;
+                case Loc::getMessage('INVALID_AUTH'):
+                    $code = 400;
+                    header('400 Bad Request', true, 400);
+                    break;
+            }
+
+            $this->addError(new Error($e->getMessage(), $code));
             return false;
         }
     }
